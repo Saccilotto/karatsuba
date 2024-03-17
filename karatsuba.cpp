@@ -51,7 +51,7 @@ string subtractStrings(string num1, string num2) {
     return result;
 }
 
-string multiplyStrings(string num1, string num2) {
+string karatsuba(string num1, string num2) {
     int n = num1.size();
     int m = num2.size();
 
@@ -70,9 +70,9 @@ string multiplyStrings(string num1, string num2) {
     string num2_high = num2.substr(0, m - splitPosition);
     string num2_low = num2.substr(m - splitPosition);
 
-    string z0 = multiplyStrings(num1_low, num2_low);
-    string z1 = multiplyStrings(addStrings(num1_high, num1_low), addStrings(num2_high, num2_low));
-    string z2 = multiplyStrings(num1_high, num2_high);
+    string z0 = karatsuba(num1_low, num2_low);
+    string z1 = karatsuba(addStrings(num1_high, num1_low), addStrings(num2_high, num2_low));
+    string z2 = karatsuba(num1_high, num2_high);
 
     z1 = subtractStrings(subtractStrings(z1, z2), z0);
 
@@ -102,7 +102,7 @@ int main(int argc , char *argv[]) {
     string numero1 = argv[1];
     string numero2 = argv[2];
 
-    string result = multiplyStrings(numero1, numero2);
+    string result = karatsuba(numero1, numero2);
 
     cout << result << endl;
 
