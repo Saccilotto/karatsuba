@@ -65,16 +65,35 @@ string karatsuba(string num1, string num2) {
         return to_string(stoi(num1) * stoi(num2));
     }
 
-    int maxLength = max(n, m);
-    int splitPosition = maxLength / 3;
+    // Calcula a posição de separação
+    int splitPosition = max(n, m) / 3;
+    if (splitPosition == 0) {
+        splitPosition = 1;
+    }
 
-    string num1_high = num1.substr(0, n - splitPosition * 2);
-    string num1_mid = num1.substr(n - splitPosition * 2, splitPosition);
-    string num1_low = num1.substr(n - splitPosition);
-    
-    string num2_high = num2.substr(0, m - splitPosition * 2);
-    string num2_mid = num2.substr(m - splitPosition * 2, splitPosition);
-    string num2_low = num2.substr(m - splitPosition);
+    string num1_high, num1_mid, num1_low;
+    string num2_high, num2_mid, num2_low;
+
+    // separação de acordo com o tamanho dos números
+    if (n >= 3) {
+        num1_high = num1.substr(0, n - splitPosition * 2);
+        num1_mid = num1.substr(n - splitPosition * 2, splitPosition);
+        num1_low = num1.substr(n - splitPosition);
+    } else {
+        num1_high = "0";
+        num1_mid = num1.substr(0, n / 2);
+        num1_low = num1.substr(n / 2);
+    }
+
+    if (m >= 3) {
+        num2_high = num2.substr(0, m - splitPosition * 2);
+        num2_mid = num2.substr(m - splitPosition * 2, splitPosition);
+        num2_low = num2.substr(m - splitPosition);
+    } else {
+        num2_high = "0";
+        num2_mid = num2.substr(0, m / 2);
+        num2_low = num2.substr(m / 2);
+    }
 
     string z0 = karatsuba(num1_low, num2_low);
     string z1 = karatsuba(addStrings(num1_low, num1_mid), addStrings(num2_low, num2_mid));
@@ -84,6 +103,7 @@ string karatsuba(string num1, string num2) {
     z1 = subtractStrings(subtractStrings(z1, z2), z0);
     z2 = subtractStrings(subtractStrings(z2, z3), z0);
 
+    // Concatenação dos resultados
     string result = z3;
     for (int i = 0; i < splitPosition * 2; ++i)
         result += '0';
@@ -95,12 +115,14 @@ string karatsuba(string num1, string num2) {
         result += '0';
     result = addStrings(result, z0);
 
+    // Remoção de zeros à esquerda
     while (result.size() > 1 && result[0] == '0') {
         result.erase(0, 1);
     }
 
     return result;
 }
+
 
 int main(int argc , char *argv[]) {
 
@@ -109,7 +131,6 @@ int main(int argc , char *argv[]) {
         return 1;
     }
     
-
     string numero1 = argv[1];
     string numero2 = argv[2];
 
