@@ -4,37 +4,37 @@
 
 using namespace std;
 
-string addStrings(string num1, string num2) {
+string concatena(string fator1, string fator2) {
     
-    string result;
-    int carry = 0;
-    int i = num1.size() - 1;
-    int j = num2.size() - 1;
+    string resultado;
+    int carrier = 0;
+    int i = fator1.size() - 1;
+    int j = fator2.size() - 1;
 
-    while (i >= 0 || j >= 0 || carry) {
-        int sum = carry;
+    while (i >= 0 || j >= 0 || carrier) {
+        int sum = carrier;
         if (i >= 0)
-            sum += num1[i--] - '0';
+            sum += fator1[i--] - '0';
         if (j >= 0)
-            sum += num2[j--] - '0';
-        carry = sum / 10;
+            sum += fator2[j--] - '0';
+        carrier = sum / 10;               
         sum %= 10;
-        result.push_back(sum + '0');
+        resultado.push_back(sum + '0');
     }
-    reverse(result.begin(), result.end());
-    return result;
+    reverse(resultado.begin(), resultado.end());
+    return resultado;
 }
 
-string subtractStrings(string num1, string num2) {
+string subtractStrings(string fator1, string fator2) {
 
-    string result;
+    string resultado;
     int borrow = 0;
-    int i = num1.size() - 1;
-    int j = num2.size() - 1;
+    int i = fator1.size() - 1;
+    int j = fator2.size() - 1;
 
     while (i >= 0 || j >= 0) {
-        int digit1 = (i >= 0) ? num1[i--] - '0' : 0;
-        int digit2 = (j >= 0) ? num2[j--] - '0' : 0;
+        int digit1 = (i >= 0) ? fator1[i--] - '0' : 0;
+        int digit2 = (j >= 0) ? fator2[j--] - '0' : 0;
         int diff = digit1 - digit2 - borrow;
         if (diff < 0) {
             diff += 10;
@@ -42,85 +42,85 @@ string subtractStrings(string num1, string num2) {
         } else {
             borrow = 0;
         }
-        result.push_back(diff + '0');
+        resultado.push_back(diff + '0');
     }
 
-    while (result.size() > 1 && result[result.size() - 1] == '0') {
-        result.pop_back();
+    while (resultado.size() > 1 && resultado[resultado.size() - 1] == '0') {
+        resultado.pop_back();
     }
 
-    reverse(result.begin(), result.end());
-    return result;
+    reverse(resultado.begin(), resultado.end());
+    return resultado;
 }
 
-string karatsuba(string num1, string num2) {
+string karatsuba(string numero1, string numero2) {
 
-    int n = num1.size();
-    int m = num2.size();
+    int n = numero1.size();
+    int m = numero2.size();
 
     if (n == 0 || m == 0)
         return "0";
 
     if (n == 1 || m == 1) {
-        return to_string(stoi(num1) * stoi(num2));
+        return to_string(stoi(numero1) * stoi(numero2));
     }
 
     // Calcula a posição de separação
-    int splitPosition = max(n, m) / 3;
-    if (splitPosition == 0) {
-        splitPosition = 1;
+    int quebra_indice = max(n, m) / 3;
+    if (quebra_indice == 0) {
+        quebra_indice = 1;
     }
 
-    string num1_high, num1_mid, num1_low;
-    string num2_high, num2_mid, num2_low;
+    string numero1_esquerda, numero1_meio, numero1_direita;
+    string numero2_esquerda, numero2_meio, numero2_direita;
 
     // separação de acordo com o tamanho dos números
     if (n >= 3) {
-        num1_high = num1.substr(0, n - splitPosition * 2);
-        num1_mid = num1.substr(n - splitPosition * 2, splitPosition);
-        num1_low = num1.substr(n - splitPosition);
+        numero1_esquerda = numero1.substr(0, n - quebra_indice * 2);
+        numero1_meio = numero1.substr(n - quebra_indice * 2, quebra_indice);
+        numero1_direita = numero1.substr(n - quebra_indice);
     } else {
-        num1_high = "0";
-        num1_mid = num1.substr(0, n / 2);
-        num1_low = num1.substr(n / 2);
+        numero1_esquerda = "0";
+        numero1_meio = numero1.substr(0, n / 2);
+        numero1_direita = numero1.substr(n / 2);
     }
 
     if (m >= 3) {
-        num2_high = num2.substr(0, m - splitPosition * 2);
-        num2_mid = num2.substr(m - splitPosition * 2, splitPosition);
-        num2_low = num2.substr(m - splitPosition);
+        numero2_esquerda = numero2.substr(0, m - quebra_indice * 2);
+        numero2_meio = numero2.substr(m - quebra_indice * 2, quebra_indice);
+        numero2_direita = numero2.substr(m - quebra_indice);
     } else {
-        num2_high = "0";
-        num2_mid = num2.substr(0, m / 2);
-        num2_low = num2.substr(m / 2);
+        numero2_esquerda = "0";
+        numero2_meio = numero2.substr(0, m / 2);
+        numero2_direita = numero2.substr(m / 2);
     }
 
-    string z0 = karatsuba(num1_low, num2_low);
-    string z1 = karatsuba(addStrings(num1_low, num1_mid), addStrings(num2_low, num2_mid));
-    string z2 = karatsuba(addStrings(num1_high, num1_mid), addStrings(num2_high, num2_mid));
-    string z3 = karatsuba(num1_high, num2_high);
+    string a0 = karatsuba(numero1_direita, numero2_direita);
+    string a1 = karatsuba(concatena(numero1_direita, numero1_meio), concatena(numero2_direita, numero2_meio));
+    string a2 = karatsuba(concatena(numero1_esquerda, numero1_meio), concatena(numero2_esquerda, numero2_meio));
+    string a3 = karatsuba(numero1_esquerda, numero2_esquerda);
 
-    z1 = subtractStrings(subtractStrings(z1, z2), z0);
-    z2 = subtractStrings(subtractStrings(z2, z3), z0);
+    a1 = subtractStrings(subtractStrings(a1, a2), a0);
+    a2 = subtractStrings(subtractStrings(a2, a3), a0);
 
-    // Concatenação dos resultados
-    string result = z3;
-    for (int i = 0; i < splitPosition * 2; ++i)
-        result += '0';
-    result = addStrings(result, z2);
-    for (int i = 0; i < splitPosition; ++i)
-        result += '0';
-    result = addStrings(result, z1);
-    for (int i = 0; i < splitPosition; ++i)
-        result += '0';
-    result = addStrings(result, z0);
+    // Concatenação dos resultadoados
+    string resultado = a3;
+    for (int i = 0; i < quebra_indice * 2; ++i)
+        resultado += '0';
+    resultado = concatena(resultado, a2);
+    for (int i = 0; i < quebra_indice; ++i)
+        resultado += '0';
+    resultado = concatena(resultado, a1);
+    for (int i = 0; i < quebra_indice; ++i)
+        resultado += '0';
+    resultado = concatena(resultado, a0);
 
     // Remoção de zeros à esquerda
-    while (result.size() > 1 && result[0] == '0') {
-        result.erase(0, 1);
+    while (resultado.size() > 1 && resultado[0] == '0') {
+        resultado.erase(0, 1);
     }
 
-    return result;
+    return resultado;
 }
 
 
@@ -134,9 +134,9 @@ int main(int argc , char *argv[]) {
     string numero1 = argv[1];
     string numero2 = argv[2];
 
-    string result = karatsuba(numero1, numero2);
+    string resultado = karatsuba(numero1, numero2);
 
-    cout << result << endl;
+    cout << resultado << endl;
 
     return 0;
 }
