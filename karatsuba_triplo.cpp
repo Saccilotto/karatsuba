@@ -5,7 +5,6 @@
 using namespace std;
 
 string concatena(string fator1, string fator2) {
-    
     string resultado;
     int carrier = 0;
     int i = fator1.size() - 1;
@@ -17,7 +16,7 @@ string concatena(string fator1, string fator2) {
             sum += fator1[i--] - '0';
         if (j >= 0)
             sum += fator2[j--] - '0';
-        carrier = sum / 10;               
+        carrier = sum / 10;
         sum %= 10;
         resultado.push_back(sum + '0');
     }
@@ -26,7 +25,6 @@ string concatena(string fator1, string fator2) {
 }
 
 string subtractStrings(string fator1, string fator2) {
-
     string resultado;
     int borrow = 0;
     int i = fator1.size() - 1;
@@ -45,92 +43,71 @@ string subtractStrings(string fator1, string fator2) {
         resultado.push_back(diff + '0');
     }
 
-    while (resultado.size() > 1 && resultado[resultado.size() - 1] == '0') {
-        resultado.pop_back();
-    }
-
     reverse(resultado.begin(), resultado.end());
     return resultado;
 }
 
 string karatsuba(string numero1, string numero2) {
-
     int n = numero1.size();
     int m = numero2.size();
 
-    if (n == 0 || m == 0)
+    if (n == 0 || m == 0) {
         return "0";
+    }
+
+    // Condição de parada para números pequenos
+    if (n == 1 || m == 1) {
+        return to_string((numero1[0] - '0') * (numero2[0] - '0'));
+    }
+
+    // Adiciona zeros à esquerda para garantir que ambos os números tenham o mesmo número de dígitos
+    int max_len = max(n, m);
+
+    numero1.size() < max_len ? numero1.insert(0, max_len - numero1.size(), '0') : numero1;
+    numero2.size() < max_len ? numero2.insert(0, max_len - numero2.size(), '0') : numero2;    
 
     if (n == 1 || m == 1) {
-        return to_string(stoi(numero1) * stoi(numero2));
+        return to_string((numero1[0] - '0') * (numero2[0] - '0'));
     }
 
     // Calcula a posição de separação
-    int quebra_indice = max(n, m) / 3;
-    if (quebra_indice == 0) {
-        quebra_indice = 1;
-    }
+    int quebra_indice = n / 3;
 
-    string numero1_esquerda, numero1_meio, numero1_direita;
-    string numero2_esquerda, numero2_meio, numero2_direita;
+    string numero1_esquerda = numero1.substr(0, quebra_indice);
+    string numero1_meio = numero1.substr(quebra_indice, quebra_indice);
+    string numero1_direita = numero1.substr(quebra_indice * 2);
 
-    // separação de acordo com o tamanho dos números
-    if (n >= 3) {
-        numero1_esquerda = numero1.substr(0, n - quebra_indice * 2);
-        numero1_meio = numero1.substr(n - quebra_indice * 2, quebra_indice);
-        numero1_direita = numero1.substr(n - quebra_indice);
-    } else {
-        numero1_esquerda = "0";
-        numero1_meio = numero1.substr(0, n / 2);
-        numero1_direita = numero1.substr(n / 2);
-    }
-
-    if (m >= 3) {
-        numero2_esquerda = numero2.substr(0, m - quebra_indice * 2);
-        numero2_meio = numero2.substr(m - quebra_indice * 2, quebra_indice);
-        numero2_direita = numero2.substr(m - quebra_indice);
-    } else {
-        numero2_esquerda = "0";
-        numero2_meio = numero2.substr(0, m / 2);
-        numero2_direita = numero2.substr(m / 2);
-    }
+    string numero2_esquerda = numero2.substr(0, quebra_indice);
+    string numero2_meio = numero2.substr(quebra_indice, quebra_indice);
+    string numero2_direita = numero2.substr(quebra_indice * 2);
 
     string a0 = karatsuba(numero1_direita, numero2_direita);
     string a1 = karatsuba(concatena(numero1_direita, numero1_meio), concatena(numero2_direita, numero2_meio));
     string a2 = karatsuba(concatena(numero1_esquerda, numero1_meio), concatena(numero2_esquerda, numero2_meio));
     string a3 = karatsuba(numero1_esquerda, numero2_esquerda);
 
-    a1 = subtractStrings(subtractStrings(a1, a2), a0);
-    a2 = subtractStrings(subtractStrings(a2, a3), a0);
+    // Ajuste dos resultados intermediários
+    a1 = subtractStrings(a1, a0);
+    a1 = subtractStrings(a1, a2);
+    a2 = subtractStrings(a2, a3);
 
-    // Concatenação dos resultadoados
-    string resultado = a3;
-    for (int i = 0; i < quebra_indice * 2; ++i)
-        resultado += '0';
-    resultado = concatena(resultado, a2);
-    for (int i = 0; i < quebra_indice; ++i)
-        resultado += '0';
-    resultado = concatena(resultado, a1);
-    for (int i = 0; i < quebra_indice; ++i)
-        resultado += '0';
-    resultado = concatena(resultado, a0);
-
-    // Remoção de zeros à esquerda
-    while (resultado.size() > 1 && resultado[0] == '0') {
-        resultado.erase(0, 1);
+    // Shifts para as partes intermediárias
+    for (int i = 0; i < quebra_indice; ++i) {
+        a1 += "0";
+        a2 += "0";
     }
 
+    // Concatenação dos resultados
+    string resultado = concatena(concatena(a3, a2), a1);
     return resultado;
 }
 
-
-int main(int argc , char *argv[]) {
-
+int main(int argc, char *argv[]) {
     if (argc != 3) {
         cout << "Usage: " << argv[0] << " <number1> <number2>" << endl;
         return 1;
     }
-    
+
     string numero1 = argv[1];
     string numero2 = argv[2];
 

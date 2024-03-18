@@ -25,3 +25,7 @@ $(KARAT_TARGET): $(KARATSUBA_OBJS)
 $(KARAT_TRIPLO_TARGET): $(KARATSUBA_TRIPLO_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
+# Clean all .o files and executable generated files
+clean:
+	rm -f $(KARATSUBA_OBJS) $(KARATSUBA_TRIPLO_OBJS) $(KARAT_TARGET) $(KARAT_TRIPLO_TARGET)
+
