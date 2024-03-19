@@ -2,12 +2,10 @@
 
 1. A Seguinte versão mínima de um destes compiladores instalados (que suportam ao menos C++ 11):
 
+- gcc-4.8.1 or greater.
 - g++-4.8.1 or greater.
-- clang-3.5 or greater.
-- icc-15 or greater.
-- Visual-C++ 14 (Visual Studio 2015)
 
-2. rodar o comando: make ou make all
+2. rodar o comando: make ou make all    (o arquvio Makefile assume compilado g++)
 
 # Executando o programa
 

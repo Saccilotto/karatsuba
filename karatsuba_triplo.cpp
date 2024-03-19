@@ -4,106 +4,103 @@
 
 using namespace std;
 
-string concatena(string fator1, string fator2) {
-    string resultado;
-    int carrier = 0;
-    int i = fator1.size() - 1;
-    int j = fator2.size() - 1;
+string adiciona_str(string num1, string num2) {
+    string result = "";
+    int carry = 0;
+    int i = num1.size() - 1;
+    int j = num2.size() - 1;
 
-    while (i >= 0 || j >= 0 || carrier) {
-        int sum = carrier;
-        if (i >= 0)
-            sum += fator1[i--] - '0';
-        if (j >= 0)
-            sum += fator2[j--] - '0';
-        carrier = sum / 10;
-        sum %= 10;
-        resultado.push_back(sum + '0');
-    }
-    reverse(resultado.begin(), resultado.end());
-    return resultado;
-}
-
-string subtractStrings(string fator1, string fator2) {
-    string resultado;
-    int borrow = 0;
-    int i = fator1.size() - 1;
-    int j = fator2.size() - 1;
-
-    while (i >= 0 || j >= 0) {
-        int digit1 = (i >= 0) ? fator1[i--] - '0' : 0;
-        int digit2 = (j >= 0) ? fator2[j--] - '0' : 0;
-        int diff = digit1 - digit2 - borrow;
-        if (diff < 0) {
-            diff += 10;
-            borrow = 1;
-        } else {
-            borrow = 0;
-        }
-        resultado.push_back(diff + '0');
+    while (i >= 0 || j >= 0 || carry) {
+        int sum = carry;
+        if (i >= 0) sum += num1[i--] - '0';
+        if (j >= 0) sum += num2[j--] - '0';
+        carry = sum / 10;
+        result.push_back(sum % 10 + '0');
     }
 
-    reverse(resultado.begin(), resultado.end());
-    return resultado;
+    reverse(result.begin(), result.end());
+    
+    return result;
 }
 
-string karatsuba(string numero1, string numero2) {
-    int n = numero1.size();
-    int m = numero2.size();
-    /*
+string subtract_str(string num1, string num2) {
+    string result = "";
+    int carry = 0;
+    int i = num1.size() - 1;
+    int j = num2.size() - 1;
+
+    while (i >= 0) {
+        int sub = ((num1[i] - '0') - (j >= 0 ? num2[j] - '0' : 0) - carry);
+        if (sub < 0) {
+            sub += 10;
+            carry = 1;
+        } else
+            carry = 0;
+
+        result.push_back(sub + '0');
+        i--;
+        j--;
+    }
+
+    int start = result.size() - 1;
+    
+    while (start >= 0 && result[start] == '0') {
+        start--;
+    }
+    
+    if (start < 0) {
+        return "0";
+    }
+    
+    result = result.substr(0, start + 1);
+
+    reverse(result.begin(), result.end());
+    
+    return result;
+}
+
+string multiplica_inteiros(string num1, string num2) {
+    int n1 = num1[0] - '0';
+    int n2 = (num2.size() != 0) ? num2[0] - '0' : 0;
+    int product = n1 * n2;
+    return to_string(product);
+}
+
+string karatsuba(string num1, string num2) {
+    int n = num1.size();
+    int m = num2.size();
+
     if (n == 0 || m == 0) {
         return "0";
     }
-    */
-    // Condição de parada para números pequenos
-    if (n == 1 || m == 1) {
-        return to_string((numero1[0] - '0') * (numero2[0] - '0'));
+
+    if (n == 1 && m == 1) {
+        return multiplica_inteiros(num1, num2);
     }
 
-    // Adiciona zeros à esquerda para garantir que ambos os números tenham o mesmo número de dígitos
-    int max_len = max(n, m);
+    int mid = max(n, m) / 2;
 
-    numero1.size() < max_len ? numero1.insert(0, max_len - numero1.size(), '0') : numero1;
-    numero2.size() < max_len ? numero2.insert(0, max_len - numero2.size(), '0') : numero2;    
+    string num1_low = num1.substr(mid);
+    string num1_high = num1.substr(0, mid);
+    string num2_low = num2.substr(mid);
+    string num2_high = num2.substr(0, mid);
 
-    if (n == 1 || m == 1) {
-        return to_string((numero1[0] - '0') * (numero2[0] - '0'));
-    }
+    string a0 = karatsuba(num1_low, num2_low);
+    string a1 = karatsuba(adiciona_str(num1_low, num1_high), adiciona_str(num2_low, num2_high));
+    string a2 = karatsuba(num1_high, num2_high);
 
-    // Calcula a posição de separação
-    int quebra_indice_fact1 = n / 3;
-    int quebra_indice_fact2 = m / 3;
+    string produto1 = subtract_str(a1, adiciona_str(a0, a2));
 
-    // quebra em 3 cada fator da multiplicação
-    string numero1_esquerda = numero1.substr(0, quebra_indice_fact1);
-    string numero1_meio = numero1.substr(quebra_indice_fact1, quebra_indice_fact1);
-    string numero1_direita = numero1.substr(quebra_indice_fact1 * 2);
-
-    string numero2_esquerda = numero2.substr(0, quebra_indice_fact2);
-    string numero2_meio = numero2.substr(quebra_indice_fact2, quebra_indice_fact2);
-    string numero2_direita = numero2.substr(quebra_indice_fact2 * 2);
-
-    // TODO: Revisar lógica recursão
-
-    string a0 = karatsuba(numero1_direita , numero2_direita);
-    string a1 = karatsuba(concatena(numero1_direita, numero1_meio), concatena(numero2_direita, numero2_meio));
-    string a2 = karatsuba(concatena(numero1_esquerda, numero1_meio), concatena(numero2_esquerda, numero2_meio));
-    string a3 = karatsuba(numero1_esquerda, numero2_esquerda);
-
-    // Ajuste dos resultados intermediários
-    a1 = subtractStrings(a1, a0);
-    a1 = subtractStrings(a1, a2);
-    a2 = subtractStrings(a2, a3);
-
-    // Shifts para as partes intermediárias
-    for (int i = 0; i < max_len/3; ++i) {
-        a1 += "0";
+    for (int i = 0; i < 2 * (n - mid); i++) { 
         a2 += "0";
+    } 
+
+    for (int i = 0; i < n - mid; i++) {
+        produto1 += "0";
     }
 
-    // Concatenação dos resultados
-    string resultado = concatena(concatena(a3, a2), a1);
-    return resultado;
+    string result = adiciona_str(a0, adiciona_str(produto1, a2));
+    return result;
 }
 
 int main(int argc, char *argv[]) {
@@ -112,12 +109,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    string numero1 = argv[1];
-    string numero2 = argv[2];
+    string num1 = argv[1];
+    string num2 = argv[2];
 
-    string resultado = karatsuba(numero1, numero2);
+    string result = karatsuba(num1, num2);
 
-    cout << resultado << endl;
+    cout << result << endl;
 
     return 0;
 }
