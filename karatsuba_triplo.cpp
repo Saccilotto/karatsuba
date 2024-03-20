@@ -31,12 +31,11 @@ string subtract_str(const string &fator1, const string &fator2) {
     int borrow = 0;
     int i = fator1.length() - 1, j = fator2.length() - 1;
     
-    while (i >= 0) {
-        int diff = (fator1[i--] - '0') - borrow;
+    while (i >= 0 || borrow) {
+        int diff = (i >= 0 ? fator1[i--] - '0' : 0) - borrow;
 
-        if (j >= 0) {
-            diff -= (fator2[j--] - '0');
-        }
+        if (j >= 0)
+            diff -= fator2[j--] - '0';
 
         if (diff < 0) {
             diff += 10;
@@ -50,7 +49,37 @@ string subtract_str(const string &fator1, const string &fator2) {
     
     reverse(result.begin(), result.end());
 
+    // Remover zeros à esquerda
+    while (result.length() > 1 && result[0] == '0')
+        result.erase(0, 1);
+
     return result;
+}
+
+// Função para multiplicar dois números representados como strings
+string multiplica(const string &num1, const string &num2) {
+    int n1 = num1.size();
+    int n2 = num2.size();
+    if (n1 == 0 || n2 == 0) return "0";
+
+    vector<int> result(n1 + n2, 0);
+
+    for (int i = n1 - 1; i >= 0; i--) {
+        for (int j = n2 - 1; j >= 0; j--) {
+            int mult = (num1[i] - '0') * (num2[j] - '0');
+            int sum = mult + result[i + j + 1];
+            result[i + j] += sum / 10;
+            result[i + j + 1] = sum % 10;
+        }
+    }
+
+    string resultado;
+    for (int i = 0; i < result.size(); i++) {
+        if (!(resultado.empty() && result[i] == 0))
+            resultado.push_back(result[i] + '0');
+    }
+
+    return resultado.empty() ? "0" : resultado;
 }
 
 void separa_tres(const string &numero, string &parte1, string &parte2, string &parte3) {
@@ -95,54 +124,7 @@ void separa_tres(const string &numero, string &parte1, string &parte2, string &p
     }
 }
 
-string multiplica(const string &num1, const string &num2) {
-    int n1 = num1.size();
-    int n2 = num2.size();
-    if (n1 == 0 || n2 == 0) return "0";
-
-    vector<int> result(n1 + n2, 0);
-
-    int i_n1 = 0; 
-    int i_n2 = 0; 
-
-    for (int i=n1-1; i>=0; i--) {
-        int carry = 0;
-        int n1 = num1[i] - '0';
-
-        i_n2 = 0; 
-
-        for (int j=n2-1; j>=0; j--) {
-            int n2 = num2[j] - '0';
-
-            int sum = n1*n2 + result[i_n1 + i_n2] + carry;
-
-            carry = sum / 10;
-
-            result[i_n1 + i_n2] = sum % 10;
-
-            i_n2++;
-        }
-
-        if (carry > 0)
-            result[i_n1 + i_n2] += carry;
-
-        i_n1++;
-    }
-
-    int i = result.size() - 1;
-    while (i>=0 && result[i] == 0)
-        i--;
-
-    if (i == -1)
-        return "0";
-
-    string s = "";
-    while (i >= 0)
-        s += std::to_string(result[i--]);
-
-    return s;
-}
-
+// Função para multiplicar dois números representados como strings usando o algoritmo de Karatsuba triplo
 string karatsuba_triplo(const string &fator1, const string &fator2) {
     // Verifica se algum dos fatores é zero
     if (fator1 == "0" || fator2 == "0") {
@@ -152,8 +134,8 @@ string karatsuba_triplo(const string &fator1, const string &fator2) {
     int tamanho1 = fator1.length();
     int tamanho2 = fator2.length();
 
-    // Condição de parada: se os números têm menos de 4 dígitos, multiplicar diretamente
-    if (tamanho1 <= 3 && tamanho2 <= 3) {
+    // Condição de parada: se um dos números têm menos de 4 dígitos, multiplicar diretamente
+    if (tamanho1 <= 3 || tamanho2 <= 3) {
         return multiplica(fator1, fator2);
     }
 
@@ -176,11 +158,6 @@ string karatsuba_triplo(const string &fator1, const string &fator2) {
 
     // Combina os termos intermediários para obter o resultado final
     string result = adiciona_str(adiciona_str(term1, adiciona_str(term2, term3)), p5);
-
-    // Remove os zeros à esquerda do resultado
-    while (!result.empty() && result[0] == '0') {
-        result.erase(result.begin());
-    }
 
     return result;
 }
