@@ -35,6 +35,7 @@ string adiciona_str(const string &num1, const string &num2) {
 
     // Reverte o resultado e retorna
     reverse(result.begin(), result.end());
+
     return result;
 }
 
@@ -83,6 +84,7 @@ string subtract_str(const string &num1, const string &num2) {
     // Inverte o resultado e retorna
     result = result.substr(start, result.length() - start);
     reverse(result.begin(), result.end());
+    
     return result;
 }
 
@@ -90,52 +92,87 @@ string subtract_str(const string &num1, const string &num2) {
 string multiplica(const string &num1, const string &num2) {
     int n1 = num1.size();
     int n2 = num2.size();
-    if (n1 == 0 || n2 == 0) return "0";
+    if (n1 == 0 || n2 == 0) {
+        return "0";
+    }
 
     vector<int> result(n1 + n2, 0);
 
-    // Multiplica dígito a dígito
+    int i_n1 = 0;
+    int i_n2 = 0;
+
     for (int i = n1 - 1; i >= 0; i--) {
+        int carry = 0;
+        int n1 = num1[i] - '0';
+
+        i_n2 = 0;
+
         for (int j = n2 - 1; j >= 0; j--) {
-            int mult = (num1[i] - '0') * (num2[j] - '0');
-            int sum = mult + result[i + j + 1];
-            result[i + j] += sum / 10;
-            result[i + j + 1] = sum % 10;
+            int n2 = num2[j] - '0';
+
+            int sum = n1 * n2 + result[i_n1 + i_n2] + carry;
+
+            carry = sum / 10;
+
+            result[i_n1 + i_n2] = sum % 10;
+
+            i_n2++;
         }
+
+        if (carry > 0) {
+            result[i_n1 + i_n2] += carry;
+        }
+
+        i_n1++;
     }
 
-    // Converte o resultado para string
-    string resultado;
-    for (int i = 0; i < result.size(); i++) {
-        if (!(resultado.empty() && result[i] == 0))
-            resultado.push_back(result[i] + '0');
+    int i = result.size() - 1;
+    while (i >= 0 && result[i] == 0) {
+        i--;
     }
 
-    return resultado.empty() ? "0" : resultado;
+    if (i == -1) {
+        return "0";
+    }
+
+    string s = "";
+
+    while (i >= 0) {
+        s += std::to_string(result[i--]);
+    }
+
+    return s;
 }
 
-// Função para dividir um número representado como uma string por três
-string separa_tres(const string &num) {
+// Função para dividir um número representado como uma string por uma constante
+string divide_str(const string &num, const string &divisor_str) {
+    int divisor = stoi(divisor_str);
     string result = "";
     int idx = 0;
     int temp = num[idx] - '0';
-    while (temp < 3)
+
+    while (temp < divisor) {
         temp = temp * 10 + (num[++idx] - '0');
-    while (num.size() > idx) {
-        result += (temp / 3) + '0';
-        temp = (temp % 3) * 10 + num[++idx] - '0';
     }
-    if (result.length() == 0)
+
+    while (num.size() > idx) {
+        result += (temp / divisor) + '0';
+        temp = (temp % divisor) * 10 + num[++idx] - '0';
+    }
+
+    if (result.length() == 0) {
         return "0";
+    }
+
     return result;
 }
 
 // Função para combinar coeficientes
-string combina(const string &c0, const string &c1, const string &c2, const string &c3, const string &c4) {
-    string term1 = c0 + string(c4.length() * 4, '0');
-    string term2 = c1 + string(c4.length() * 3, '0');
-    string term3 = c2 + string(c4.length() * 2, '0');
-    string term4 = c3 + string(c4.length(), '0');
+string combina(const string &c0, const string &c1, const string &c2, const string &c3, const string &c4, int original_length) {
+    string term1 = c0 + string(2 * original_length, '0');
+    string term2 = divide_str(subtract_str(subtract_str(c1, c0), c2), "2") + string(3 * original_length / 2, '0');
+    string term3 = c2 + string(original_length, '0');
+    string term4 = divide_str(subtract_str(subtract_str(c3, c1), c4), "2") + string(original_length / 2, '0');
     string term5 = c4;
 
     // Combina os termos para obter o resultado final
@@ -144,68 +181,61 @@ string combina(const string &c0, const string &c1, const string &c2, const strin
     return result;
 }
 
-// Função para dividir um número representado como uma string por três
-string divideByThree(const string &num) {
-    string result = "";
-    int idx = 0;
-    int temp = num[idx] - '0';
-    while (temp < 3)
-        temp = temp * 10 + (num[++idx] - '0');
-    while (num.size() > idx) {
-        result += (temp / 3) + '0';
-        temp = (temp % 3) * 10 + num[++idx] - '0';
+// Função para dividir um número em três partes
+void separa_tres(const string &num, string &part1, string &part2, string &part3) {
+    int length = num.length();
+    int part_length = length / 3;
+
+    // If the length of the number is not divisible by 3, the first part should be one digit longer
+    if (length % 3 != 0) {
+        part_length++;
     }
-    if (result.length() == 0)
-        return "0";
-    return result;
-}
 
-// Função para dividir um número representado como uma string em três partes
-void separa_tres(const string &num, string &parte1, string &parte2, string &parte3) {
-    string numDivided = divideByThree(num);
-    int len = numDivided.length();
-    int terco = len / 3;
-
-    // Divide o número em três partes
-    parte1 = numDivided.substr(0, terco);
-    parte2 = numDivided.substr(terco, terco);
-    parte3 = numDivided.substr(2 * terco);
+    part1 = num.substr(0, part_length);
+    part2 = num.substr(part_length, part_length);
+    part3 = num.substr(2 * part_length);
 }
 
 // Função para multiplicar dois números representados como strings usando o algoritmo de Karatsuba triplo
-string karatsuba_triplo(const string &fator1, const string &fator2) {
+string karatsuba_triplo(string fator1, string fator2) {
     // Verifica se algum dos fatores é zero
     if (fator1 == "0" || fator2 == "0") {
         return "0";
     }
 
-    int tamanho1 = fator1.length();
-    int tamanho2 = fator2.length();
+    // Preenche o número menor com zeros à esquerda
+    if (fator1.length() < fator2.length()) {
+        fator1 = string(fator2.length() - fator1.length(), '0') + fator1;
+    } else if (fator2.length() < fator1.length()) {
+        fator2 = string(fator1.length() - fator2.length(), '0') + fator2;
+    }
 
     // Condição de parada: se um dos números têm menos de 4 dígitos, multiplicar diretamente
-    if (tamanho1 <= 3 || tamanho2 <= 3) {
+    if (fator1.length() <= 3 || fator2.length() <= 3) {
         return multiplica(fator1, fator2);
     }
 
     // Divide os números em três partes
-    string a1, a2, a3, b1, b2, b3;
-    separa_tres(fator1, a1, a2, a3);
-    separa_tres(fator2, b1, b2, b3);
+    string a0, a1, a2, b0, b1, b2;
+    separa_tres(fator1, a0, a1, a2);
+    separa_tres(fator2, b0, b1, b2);
 
-    // Calcula as multiplicações recursivas
-    string p1 = karatsuba_triplo(a1, b1);
-    string p2 = karatsuba_triplo(adiciona_str(a1, a2), adiciona_str(b1, b2));
-    string p3 = karatsuba_triplo(a2, b2);
-    string p4 = karatsuba_triplo(adiciona_str(a2, a3), adiciona_str(b2, b3));
-    string p5 = karatsuba_triplo(a3, b3);
+    // Calcula os cinco produtos necessários
+    string p0 = karatsuba_triplo(a0, b0);
+    string p1 = karatsuba_triplo(adiciona_str(a0, a1), adiciona_str(b0, b1));
+    string p2 = karatsuba_triplo(a1, b1);
+    string p3 = karatsuba_triplo(adiciona_str(a1, a2), adiciona_str(b1, b2));
+    string p4 = karatsuba_triplo(a2, b2);
 
-    // Calcula os termos intermediários
-    string term1 = p1 + string(2 * a2.length(), '0');
-    string term2 = subtract_str(subtract_str(p2, p1), p3);
-    string term3 = subtract_str(subtract_str(subtract_str(p4, p1), p3), p5);
+    // Combina os produtos para obter os coeficientes
+    string c0 = p0;
+    string c1 = subtract_str(subtract_str(p1, p0), p2);
+    string c2 = p2;
+    string c3 = subtract_str(subtract_str(p3, p1), p4);
+    string c4 = p4;
 
-    // Combina os termos intermediários para obter o resultado final
-    string result = adiciona_str(adiciona_str(term1, adiciona_str(term2, term3)), p5);
+    // Combina os coeficientes para obter o resultado final
+    string result = combina(c0, c1, c2, c3, c4, fator1.length());
 
     return result;
 }
